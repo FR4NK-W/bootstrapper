@@ -67,7 +67,7 @@ func (g *DNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 	if !g.cfg.EnableSRV && !g.cfg.EnableSD && !g.cfg.EnableNAPTR {
 		return
 	}
-	fmt.Println("Starting hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
+	fmt.Println("Starting hinters for ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	dnsChan := dispatcher.getDNSConfig()
 	for dnsServer := range dnsChan {
 		resolvers := uniq(dnsServer.resolvers)
@@ -75,21 +75,26 @@ func (g *DNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 		for _, resolver := range resolvers {
 			for _, domain := range dnsServer.searchDomains {
 				if g.cfg.EnableSRV {
+					fmt.Println("Starting hinters for ", g.Name(), " SRV: ", time.Now().Sub(g.t0).Microseconds())
 					query := getDNSSDQuery(resolver, domain)
 					resolveDNS(resolver, query, 0, dns.TypeSRV, ipHintsChan)
+					fmt.Println("Completed hinter ", g.Name(), " SRV hint: ", time.Now().Sub(g.t0).Microseconds())
 				}
 				if g.cfg.EnableSD {
+					fmt.Println("Starting hinters for ", g.Name(), " SD: ", time.Now().Sub(g.t0).Microseconds())
 					query := getDNSSDQuery(resolver, domain)
 					resolveDNS(resolver, query, 0, dns.TypePTR, ipHintsChan)
+					fmt.Println("Completed hinter ", g.Name(), " SD hint: ", time.Now().Sub(g.t0).Microseconds())
 				}
 				if g.cfg.EnableNAPTR {
+					fmt.Println("Starting hinters for ", g.Name(), " NAPTR: ", time.Now().Sub(g.t0).Microseconds())
 					query := getDNSNAPTRQuery(resolver, domain)
 					resolveDNS(resolver, query, 0, dns.TypeNAPTR, ipHintsChan)
+					fmt.Println("Completed hinter ", g.Name(), "NAPTR hint: ", time.Now().Sub(g.t0).Microseconds())
 				}
 			}
 		}
 	}
-	fmt.Println("Completed hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	log.Info("DNS hinting done")
 }
 

@@ -258,7 +258,7 @@ func PullTRC(outputPath, workingDir string, addr *net.TCPAddr, securityMode conf
 		// symlink the TRC fetched in insecure mode into the standard directory
 		err = os.Symlink(tmpTRCpath, trcPath)
 		if err != nil {
-			log.Debug("symlink issue:", fmt.Errorf("symlinking insecure TRC failed: %w", err))
+			log.Debug("symlink issue:", "err", fmt.Errorf("symlinking insecure TRC failed: %w", err))
 			err = nil
 		}
 	} else {
