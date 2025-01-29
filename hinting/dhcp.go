@@ -35,10 +35,15 @@ var _ HintGenerator = (*DHCPHintGenerator)(nil)
 type DHCPHintGenerator struct {
 	cfg   *DHCPHintGeneratorConf
 	iface *net.Interface
+	name  string
+}
+
+func (g *DHCPHintGenerator) Name() string {
+	return g.name
 }
 
 func NewDHCPHintGenerator(cfg *DHCPHintGeneratorConf, iface *net.Interface) *DHCPHintGenerator {
-	return &DHCPHintGenerator{cfg, iface}
+	return &DHCPHintGenerator{cfg, iface, "DHCPHinter"}
 }
 
 func (g *DHCPHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {

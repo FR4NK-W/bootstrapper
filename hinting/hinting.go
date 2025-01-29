@@ -25,10 +25,10 @@ import (
 )
 
 const (
-	anapayaPEN             = 55324 // Anapaya Systems Private Enterprise Number
-	DiscoveryPort  uint16  = 8041
-	DNSInfoTimeout         = 8 * time.Second
-	DNSInfoTimeoutFallback = 10 * time.Second
+	anapayaPEN                    = 55324 // Anapaya Systems Private Enterprise Number
+	DiscoveryPort          uint16 = 8041
+	DNSInfoTimeout                = 8 * time.Second
+	DNSInfoTimeoutFallback        = 10 * time.Second
 )
 
 var (
@@ -43,6 +43,7 @@ var (
 
 type HintGenerator interface {
 	Generate(chan<- net.TCPAddr)
+	Name() string
 }
 
 func getLocalDNSConfig(dnsChan chan<- DNSInfo) {
@@ -199,11 +200,16 @@ type MOCKHintGeneratorConf struct {
 var _ HintGenerator = (*MockHintGenerator)(nil)
 
 type MockHintGenerator struct {
-	cfg *MOCKHintGeneratorConf
+	cfg  *MOCKHintGeneratorConf
+	name string
+}
+
+func (m *MockHintGenerator) Name() string {
+	return m.name
 }
 
 func NewMockHintGenerator(cfg *MOCKHintGeneratorConf) *MockHintGenerator {
-	return &MockHintGenerator{cfg}
+	return &MockHintGenerator{cfg: cfg, name: "mock"}
 }
 
 func (m *MockHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {

@@ -19,6 +19,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	log "github.com/inconshreveable/log15"
 
@@ -27,9 +28,12 @@ import (
 
 var (
 	cfg config.Config
+	t0  time.Time
 )
 
 func main() {
+	t0 = time.Now()
+	fmt.Println("Startup: ", time.Now())
 	os.Exit(realMain())
 }
 

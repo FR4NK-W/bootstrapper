@@ -48,11 +48,16 @@ var _ HintGenerator = (*DNSSDHintGenerator)(nil)
 
 // DNSSDHintGenerator implements the Domain Name System Service Discovery
 type DNSSDHintGenerator struct {
-	cfg *DNSHintGeneratorConf
+	cfg  *DNSHintGeneratorConf
+	name string
+}
+
+func (g *DNSSDHintGenerator) Name() string {
+	return g.name
 }
 
 func NewDNSSDHintGenerator(cfg *DNSHintGeneratorConf) *DNSSDHintGenerator {
-	return &DNSSDHintGenerator{cfg}
+	return &DNSSDHintGenerator{cfg, "DNS-SDHinter"}
 }
 
 func (g *DNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
@@ -86,11 +91,11 @@ func (g *DNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 func uniq(resolvers []netip.Addr) []netip.Addr {
 	filterMap := make(map[netip.Addr]struct{})
 	for _, r := range resolvers {
-		filterMap[r] = struct {}{}
+		filterMap[r] = struct{}{}
 	}
 	filtered := make([]netip.Addr, len(filterMap))
 	i := 0
-	for r, _ := range filterMap {
+	for r := range filterMap {
 		filtered[i] = r
 		i++
 	}

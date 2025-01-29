@@ -47,10 +47,15 @@ var _ HintGenerator = (*DHCPv6HintGenerator)(nil)
 type DHCPv6HintGenerator struct {
 	cfg   *DHCPv6HintGeneratorConf
 	iface *net.Interface
+	name  string
+}
+
+func (g *DHCPv6HintGenerator) Name() string {
+	return g.name
 }
 
 func NewDHCPv6HintGenerator(cfg *DHCPv6HintGeneratorConf, iface *net.Interface) *DHCPv6HintGenerator {
-	return &DHCPv6HintGenerator{cfg, iface}
+	return &DHCPv6HintGenerator{cfg, iface, "DHCPv6Hinter"}
 }
 
 func (g *DHCPv6HintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {

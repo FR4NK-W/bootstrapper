@@ -38,10 +38,15 @@ var _ HintGenerator = (*IPv6HintGenerator)(nil)
 type IPv6HintGenerator struct {
 	cfg   *IPv6HintGeneratorConf
 	iface *net.Interface
+	name  string
+}
+
+func (g *IPv6HintGenerator) Name() string {
+	return g.name
 }
 
 func NewIPv6HintGenerator(cfg *IPv6HintGeneratorConf, iface *net.Interface) *IPv6HintGenerator {
-	return &IPv6HintGenerator{cfg, iface}
+	return &IPv6HintGenerator{cfg, iface, "IPv6Hinter"}
 }
 
 func (g *IPv6HintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {

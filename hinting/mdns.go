@@ -40,10 +40,15 @@ var _ HintGenerator = (*MDNSSDHintGenerator)(nil)
 type MDNSSDHintGenerator struct {
 	cfg   *MDNSHintGeneratorConf
 	iface *net.Interface
+	name  string
+}
+
+func (g *MDNSSDHintGenerator) Name() string {
+	return g.name
 }
 
 func NewMDNSHintGenerator(cfg *MDNSHintGeneratorConf, iface *net.Interface) *MDNSSDHintGenerator {
-	return &MDNSSDHintGenerator{cfg, iface}
+	return &MDNSSDHintGenerator{cfg, iface, "MDNSHinter"}
 }
 
 func (g *MDNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {

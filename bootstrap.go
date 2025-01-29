@@ -86,6 +86,7 @@ func (b *Bootstrapper) tryBootstrapping() error {
 		wg.Add(1)
 		go func(g hinting.HintGenerator) {
 			defer wg.Done()
+			fmt.Println("Starting hinter ", g.Name(), ": ", time.Now().Sub(t0).Microseconds())
 			g.Generate(b.ipHintsChan)
 		}(g)
 	}
@@ -109,7 +110,9 @@ OuterLoop:
 			if serverAddr.Port == 0 {
 				serverAddr.Port = int(hinting.DiscoveryPort)
 			}
+			fmt.Println("Starting fetch config: ", time.Now().Sub(t0).Microseconds())
 			err := fetcher.FetchConfiguration(&cfg, serverAddr)
+			fmt.Println("Completed fetch config: ", time.Now().Sub(t0).Microseconds())
 			if err != nil {
 				return err
 			}
@@ -121,6 +124,7 @@ OuterLoop:
 			break OuterLoop
 		}
 	}
+	fmt.Println("Completed bootstrapping: ", time.Now().Sub(t0).Microseconds())
 	return nil
 }
 
