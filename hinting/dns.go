@@ -70,7 +70,21 @@ func (g *DNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 	fmt.Println("Starting hinters for ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	dnsChan := dispatcher.getDNSConfig()
 	for dnsServer := range dnsChan {
+		log.Debug("Full resolver list", "resolvers", dnsServer.resolvers)
 		resolvers := uniq(dnsServer.resolvers)
+		log.Debug("Unique resolver list", "resolvers", dnsServer.resolvers)
+		resolvers = func(resolvers []netip.Addr, filterV6 bool) []netip.Addr {
+			if !filterV6 {
+				return resolvers
+			}
+			var filtered []netip.Addr
+			for _, addr := range resolvers {
+				if !addr.Is6() {
+					filtered = append(filtered, addr)
+				}
+			}
+			return resolvers
+		}(resolvers, true)
 		log.Debug("Using following resolvers for DNS hinting", "resolvers", dnsServer.resolvers)
 		for _, resolver := range resolvers {
 			for _, domain := range dnsServer.searchDomains {
