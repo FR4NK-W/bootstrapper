@@ -47,11 +47,14 @@ const (
 	httpRequestTimeout     = 2 * time.Second
 )
 
-func FetchConfiguration(cfg *config.Config, addr *net.TCPAddr) error {
+func FetchConfiguration(cfg *config.Config, addr *net.TCPAddr, t0 time.Time) error {
+	fmt.Println("Start fetching TRCs:", time.Now().Sub(t0).Microseconds())
 	err := PullTRCs(cfg.SciondConfigDir, cfg.WorkingDir(), addr, cfg.SecurityMode)
+	fmt.Println("Completed fetching TRCs:", time.Now().Sub(t0).Microseconds())
 	if err != nil {
 		return err
 	}
+	fmt.Println("Start fetching topo:", time.Now().Sub(t0).Microseconds())
 	if cfg.SecurityMode == config.Insecure {
 		err = PullTopology(cfg.SciondConfigDir, addr)
 	} else {
@@ -61,6 +64,7 @@ func FetchConfiguration(cfg *config.Config, addr *net.TCPAddr) error {
 		}
 		err = verifySignature(cfg)
 	}
+	fmt.Println("Completed fetching topo:", time.Now().Sub(t0).Microseconds())
 	return err
 }
 

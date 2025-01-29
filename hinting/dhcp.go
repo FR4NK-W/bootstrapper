@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net"
 	"net/netip"
+	"time"
 
 	log "github.com/inconshreveable/log15"
 	"github.com/insomniacslk/dhcp/dhcpv4"
@@ -36,20 +37,22 @@ type DHCPHintGenerator struct {
 	cfg   *DHCPHintGeneratorConf
 	iface *net.Interface
 	name  string
+	t0    time.Time
 }
 
 func (g *DHCPHintGenerator) Name() string {
 	return g.name
 }
 
-func NewDHCPHintGenerator(cfg *DHCPHintGeneratorConf, iface *net.Interface) *DHCPHintGenerator {
-	return &DHCPHintGenerator{cfg, iface, "DHCPHinter"}
+func NewDHCPHintGenerator(cfg *DHCPHintGeneratorConf, iface *net.Interface, t0 time.Time) *DHCPHintGenerator {
+	return &DHCPHintGenerator{cfg, iface, "DHCPHinter", t0}
 }
 
 func (g *DHCPHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 	if !g.cfg.Enable {
 		return
 	}
+	fmt.Println("Starting hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	log.Info("DHCP Probing", "interface", g.iface.Name)
 	p, err := g.createDHCPRequest()
 	if err != nil {
@@ -63,6 +66,7 @@ func (g *DHCPHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 	}
 	go g.dispatchDNSInfo(ack, dnsInfoChan)
 	g.dispatchIPHints(ack, ipHintsChan)
+	fmt.Println("Completed hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	log.Info("DHCP hinting done")
 }
 

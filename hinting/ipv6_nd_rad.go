@@ -39,20 +39,22 @@ type IPv6HintGenerator struct {
 	cfg   *IPv6HintGeneratorConf
 	iface *net.Interface
 	name  string
+	t0    time.Time
 }
 
 func (g *IPv6HintGenerator) Name() string {
 	return g.name
 }
 
-func NewIPv6HintGenerator(cfg *IPv6HintGeneratorConf, iface *net.Interface) *IPv6HintGenerator {
-	return &IPv6HintGenerator{cfg, iface, "IPv6Hinter"}
+func NewIPv6HintGenerator(cfg *IPv6HintGeneratorConf, iface *net.Interface, t0 time.Time) *IPv6HintGenerator {
+	return &IPv6HintGenerator{cfg, iface, "IPv6Hinter", t0}
 }
 
 func (g *IPv6HintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 	if !g.cfg.Enable {
 		return
 	}
+	fmt.Println("Starting hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	if !HasIPv6(g.iface) {
 		// Do not perform NDP on interfaces that do not already have an IPv6 address configured
 		log.Info(fmt.Sprintf("No IPv6 probing performed, interface has no IPv6 address"),
@@ -95,6 +97,7 @@ func (g *IPv6HintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 		return
 	}
 	g.dispatchDNSInfo(resolvers, searchDomains, dnsInfoChan)
+	fmt.Println("Completed hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	log.Info("IPv6 hinting done")
 }
 

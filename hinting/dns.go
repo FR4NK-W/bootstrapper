@@ -16,12 +16,14 @@
 package hinting
 
 import (
+	"fmt"
 	"math/rand/v2"
 	"net"
 	"net/netip"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	log "github.com/inconshreveable/log15"
 	"github.com/miekg/dns"
@@ -50,20 +52,22 @@ var _ HintGenerator = (*DNSSDHintGenerator)(nil)
 type DNSSDHintGenerator struct {
 	cfg  *DNSHintGeneratorConf
 	name string
+	t0 time.Time
 }
 
 func (g *DNSSDHintGenerator) Name() string {
 	return g.name
 }
 
-func NewDNSSDHintGenerator(cfg *DNSHintGeneratorConf) *DNSSDHintGenerator {
-	return &DNSSDHintGenerator{cfg, "DNS-SDHinter"}
+func NewDNSSDHintGenerator(cfg *DNSHintGeneratorConf, t0 time.Time) *DNSSDHintGenerator {
+	return &DNSSDHintGenerator{cfg, "DNS-SDHinter", t0}
 }
 
 func (g *DNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 	if !g.cfg.EnableSRV && !g.cfg.EnableSD && !g.cfg.EnableNAPTR {
 		return
 	}
+	fmt.Println("Starting hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	dnsChan := dispatcher.getDNSConfig()
 	for dnsServer := range dnsChan {
 		resolvers := uniq(dnsServer.resolvers)
@@ -85,6 +89,7 @@ func (g *DNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 			}
 		}
 	}
+	fmt.Println("Completed hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	log.Info("DNS hinting done")
 }
 

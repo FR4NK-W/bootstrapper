@@ -15,6 +15,7 @@
 package hinting
 
 import (
+	"fmt"
 	"net"
 	"net/netip"
 	"runtime"
@@ -202,20 +203,22 @@ var _ HintGenerator = (*MockHintGenerator)(nil)
 type MockHintGenerator struct {
 	cfg  *MOCKHintGeneratorConf
 	name string
+	t0   time.Time
 }
 
 func (m *MockHintGenerator) Name() string {
 	return m.name
 }
 
-func NewMockHintGenerator(cfg *MOCKHintGeneratorConf) *MockHintGenerator {
-	return &MockHintGenerator{cfg: cfg, name: "mock"}
+func NewMockHintGenerator(cfg *MOCKHintGeneratorConf, t0 time.Time) *MockHintGenerator {
+	return &MockHintGenerator{cfg: cfg, name: "mock", t0: t0}
 }
 
 func (m *MockHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 	if !m.cfg.Enable {
 		return
 	}
+	fmt.Println("Starting hinter ", m.Name(), ": ", time.Now().Sub(m.t0).Microseconds())
 	tcpAddr, err := net.ResolveTCPAddr("tcp", m.cfg.Address)
 	if err != nil {
 		log.Error("Invalid IP:port for mock generator", "value", m.cfg.Address)

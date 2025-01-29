@@ -17,6 +17,7 @@ package hinting
 
 import (
 	"context"
+	"fmt"
 	"io"
 	stdlog "log"
 	"net"
@@ -41,20 +42,22 @@ type MDNSSDHintGenerator struct {
 	cfg   *MDNSHintGeneratorConf
 	iface *net.Interface
 	name  string
+	t0    time.Time
 }
 
 func (g *MDNSSDHintGenerator) Name() string {
 	return g.name
 }
 
-func NewMDNSHintGenerator(cfg *MDNSHintGeneratorConf, iface *net.Interface) *MDNSSDHintGenerator {
-	return &MDNSSDHintGenerator{cfg, iface, "MDNSHinter"}
+func NewMDNSHintGenerator(cfg *MDNSHintGeneratorConf, iface *net.Interface, t0 time.Time) *MDNSSDHintGenerator {
+	return &MDNSSDHintGenerator{cfg, iface, "MDNSHinter", t0}
 }
 
 func (g *MDNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 	if !g.cfg.Enable {
 		return
 	}
+	fmt.Println("Starting hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	// library zeroconf is noisy by default and has no way to disable logging
 	stdlog.SetFlags(0)
 	stdlog.SetOutput(io.Discard)
@@ -73,6 +76,7 @@ func (g *MDNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 			discoverEntries(resolver, searchDomain, entriesChan)
 		}
 	}
+	fmt.Println("Completed hinter ", g.Name(), ": ", time.Now().Sub(g.t0).Microseconds())
 	log.Info("mDNS hinting done")
 }
 

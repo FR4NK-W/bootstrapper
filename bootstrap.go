@@ -69,24 +69,23 @@ func NewBootstrapper(cfg *config.Config) (*Bootstrapper, error) {
 func (b *Bootstrapper) tryBootstrapping() error {
 	var hintGenerators []hinting.HintGenerator
 	hintGenerators = append(hintGenerators,
-		hinting.NewMockHintGenerator(&cfg.MOCK),
+		hinting.NewMockHintGenerator(&cfg.MOCK, t0),
 		// Gets DNS information from IPv6 RAs
-		hinting.NewIPv6HintGenerator(&cfg.IPv6, b.iface),
+		hinting.NewIPv6HintGenerator(&cfg.IPv6, b.iface, t0),
 		// Gets DHCP(v6) hints
-		hinting.NewDHCPv6HintGenerator(&cfg.DHCPv6, b.iface),
-		hinting.NewDHCPHintGenerator(&cfg.DHCP, b.iface),
+		hinting.NewDHCPv6HintGenerator(&cfg.DHCPv6, b.iface, t0),
+		hinting.NewDHCPHintGenerator(&cfg.DHCP, b.iface, t0),
 		// Note: DNS-SD depends on DNS resolution working,
 		// which can depend on DHCP for getting the local DNS resolver IP
-		hinting.NewDNSSDHintGenerator(&cfg.DNSSD),
+		hinting.NewDNSSDHintGenerator(&cfg.DNSSD, t0),
 		// Note: mDNS depends on the DNS search domain to be correct,
 		// which can depend on DHCP for getting it
-		hinting.NewMDNSHintGenerator(&cfg.MDNS, b.iface))
+		hinting.NewMDNSHintGenerator(&cfg.MDNS, b.iface, t0))
 	wg := sync.WaitGroup{}
 	for _, g := range hintGenerators {
 		wg.Add(1)
 		go func(g hinting.HintGenerator) {
 			defer wg.Done()
-			fmt.Println("Starting hinter ", g.Name(), ": ", time.Now().Sub(t0).Microseconds())
 			g.Generate(b.ipHintsChan)
 		}(g)
 	}
@@ -111,7 +110,7 @@ OuterLoop:
 				serverAddr.Port = int(hinting.DiscoveryPort)
 			}
 			fmt.Println("Starting fetch config: ", time.Now().Sub(t0).Microseconds())
-			err := fetcher.FetchConfiguration(&cfg, serverAddr)
+			err := fetcher.FetchConfiguration(&cfg, serverAddr, t0)
 			fmt.Println("Completed fetch config: ", time.Now().Sub(t0).Microseconds())
 			if err != nil {
 				return err
