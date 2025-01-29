@@ -83,7 +83,7 @@ darwin:
 
 windows:
 	@echo "Experimental"
-	env GOOS=windows go build -o scion-bootstrapper.exe -ldflags "-X github.com/netsec-ethz/bootstrapper/config.versionString="$(./.bazel-build-env | awk '{print $2}')
+	go build -o scion-bootstrapper.exe -ldflags "-X github.com/netsec-ethz/bootstrapper/config.versionString="$(./.bazel-build-env | awk '{print $2}')
 
 define go_deps_boilerplate
 # Generated from go.mod by gazelle. DO NOT EDIT

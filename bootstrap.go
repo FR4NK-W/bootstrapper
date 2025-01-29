@@ -18,6 +18,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"net/netip"
 	"os"
 	"sync"
 	"time"
@@ -124,6 +125,10 @@ OuterLoop:
 }
 
 func checkIsRoutable(dst net.IP) error {
+	ip, ok := netip.AddrFromSlice(dst)
+	if !ok || ip.Is6() {
+		return fmt.Errorf("Ignoring IPv6 hints.")
+	}
 	udpAddr := net.UDPAddr{IP: dst, Port: 1}
 	udpConn, err := net.DialUDP(udpAddr.Network(), nil, &udpAddr)
 	if err != nil {

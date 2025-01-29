@@ -61,8 +61,9 @@ func (g *DNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 	}
 	dnsChan := dispatcher.getDNSConfig()
 	for dnsServer := range dnsChan {
+		resolvers := uniq(dnsServer.resolvers)
 		log.Debug("Using following resolvers for DNS hinting", "resolvers", dnsServer.resolvers)
-		for _, resolver := range dnsServer.resolvers {
+		for _, resolver := range resolvers {
 			for _, domain := range dnsServer.searchDomains {
 				if g.cfg.EnableSRV {
 					query := getDNSSDQuery(resolver, domain)
@@ -80,6 +81,20 @@ func (g *DNSSDHintGenerator) Generate(ipHintsChan chan<- net.TCPAddr) {
 		}
 	}
 	log.Info("DNS hinting done")
+}
+
+func uniq(resolvers []netip.Addr) []netip.Addr {
+	filterMap := make(map[netip.Addr]struct{})
+	for _, r := range resolvers {
+		filterMap[r] = struct {}{}
+	}
+	filtered := make([]netip.Addr, len(filterMap))
+	i := 0
+	for r, _ := range filterMap {
+		filtered[i] = r
+		i++
+	}
+	return filtered
 }
 
 func getDNSSDQuery(resolver netip.Addr, domain string) string {
